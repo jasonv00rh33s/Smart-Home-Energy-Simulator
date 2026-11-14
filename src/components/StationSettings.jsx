@@ -20,9 +20,9 @@ function StationSettings({ stations, selectedStation, onSelectStation, chargePer
       <div
         key={selectedStation.id}
         className="station-preview animate-switch"
-        style={{ borderLeftColor: selectedStation.accentColor }}
+        style={{ borderColor: selectedStation.accentColor }}
       >
-        
+
         <div className="station-visual">
           <img
             src={selectedStation.image}
@@ -68,6 +68,7 @@ function StationSettings({ stations, selectedStation, onSelectStation, chargePer
           value={chargePercent}
           onChange={(e) => onChangeCharge(Number(e.target.value))}
           className="range-slider"
+          style={{ accentColor: selectedStation.accentColor }}
         />
       </div>
     </section>

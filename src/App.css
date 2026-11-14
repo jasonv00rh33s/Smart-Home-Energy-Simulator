@@ -152,7 +152,7 @@
 .station-preview {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-left-width: 5px;
+  border-width: 3px;
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 18px;
@@ -238,8 +238,6 @@
 .range-slider {
   width: 100%;
   cursor: pointer;
-  accent-color: #000000; ;
-
 }
 
 /* Список приладів */
@@ -416,10 +414,11 @@ input:checked + .slider:before {
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: #0369a1;
+  transform: translateY(-2px);
 }
 
 .error-text {
@@ -433,7 +432,7 @@ input:checked + .slider:before {
   padding: 14px 16px;
   border-radius: 10px;
   margin-bottom: 16px;
-  border-left: 5px solid;
+  border: 3px solid;
 }
 
 .status-banner p {
@@ -527,10 +526,12 @@ input:checked + .slider:before {
   font-weight: 600;
   cursor: pointer;
   margin-top: auto;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .btn-export:hover {
   background: #0f172a;
+  transform: translateY(-2px);
 }
 
 /* Адаптивність під планшети та смартфони */
