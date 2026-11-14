@@ -1,122 +1,162 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import { STATIONS, INITIAL_APPLIANCES } from './data/presets';
+import AuthForm from './components/AuthForm';
+import StationSettings from './components/StationSettings';
+import ApplianceManager from './components/ApplianceManager';
+import ResultDashboard from './components/ResultDashboard';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('sim_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [activeTab, setActiveTab] = useState('simulator');
+
+  const [selectedStation, setSelectedStation] = useState(STATIONS[0]);
+  const [chargePercent, setChargePercent] = useState(100);
+
+  const [appliances, setAppliances] = useState(() => {
+    const saved = localStorage.getItem('sim_appliances');
+    return saved ? JSON.parse(saved) : INITIAL_APPLIANCES;
+  });
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('sim_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('sim_user');
+    }
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem('sim_appliances', JSON.stringify(appliances));
+  }, [appliances]);
+
+  const handleToggleAppliance = (id) => {
+    setAppliances((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, isOn: !item.isOn } : item))
+    );
+  };
+
+  const handleAddAppliance = (newItem) => {
+    setAppliances((prev) => [...prev, newItem]);
+  };
+
+  const handleDeleteAppliance = (id) => {
+    setAppliances((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const handleResetAppliances = () => {
+    setAppliances(INITIAL_APPLIANCES);
+  };
+
+  if (!user) {
+    return <AuthForm onLogin={setUser} />;
+  }
+
+  const activeCount = appliances.filter((item) => item.isOn).length;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="app-wrapper">
+      <header className="top-bar">
+        <div className="brand-block">
+          <h1>Energy Simulator</h1>
+          <span className="user-info">
+            {user.name} • {user.role}
+          </span>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
+
+        {/* Навігаційна панель */}
+        <nav className="navbar">
+          <button
+            type="button"
+            className={`nav-link ${activeTab === 'simulator' ? 'active' : ''}`}
+            onClick={() => setActiveTab('simulator')}
+          >
+            Симулятор
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activeTab === 'appliances' ? 'active' : ''}`}
+            onClick={() => setActiveTab('appliances')}
+          >
+            Прилади ({activeCount})
+          </button>
+          <button
+            type="button"
+            className={`nav-link ${activeTab === 'guide' ? 'active' : ''}`}
+            onClick={() => setActiveTab('guide')}
+          >
+            Інструкція
+          </button>
+        </nav>
+
+        <button type="button" className="btn-logout" onClick={() => setUser(null)}>
+          Вийти
         </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
+      {/* Сторінка 1: Головний симулятор */}
+      {activeTab === 'simulator' && (
+        <main className="dashboard-grid animate-switch">
+          <StationSettings
+            stations={STATIONS}
+            selectedStation={selectedStation}
+            onSelectStation={setSelectedStation}
+            chargePercent={chargePercent}
+            onChangeCharge={setChargePercent}
+          />
+          <ResultDashboard
+            user={user}
+            station={selectedStation}
+            chargePercent={chargePercent}
+            appliances={appliances}
+          />
+        </main>
+      )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* Сторінка 2: Керування споживачами */}
+      {activeTab === 'appliances' && (
+        <main className="single-column animate-switch">
+          <ApplianceManager
+            appliances={appliances}
+            onToggle={handleToggleAppliance}
+            onAdd={handleAddAppliance}
+            onDelete={handleDeleteAppliance}
+            onReset={handleResetAppliances}
+          />
+        </main>
+      )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Сторінка 3: Довідник користувача */}
+      {activeTab === 'guide' && (
+        <main className="single-column animate-switch">
+          <section className="card">
+            <h2>Керівництво користувача</h2>
+            <p className="section-hint">
+              Як користуватися системою моделювання автономності:
+            </p>
+            <div className="guide-steps">
+              <div className="spec-box">
+                <strong>Крок 1. Налаштування станції</strong>
+                <span>На вкладці «Симулятор» оберіть модель зарядної станції та вкажіть поточний заряд батареї.</span>
+              </div>
+              <div className="spec-box">
+                <strong>Крок 2. Вибір споживачів</strong>
+                <span>Перейдіть на вкладку «Прилади», увімкніть потрібну техніку або додайте власний пристрій.</span>
+              </div>
+              <div className="spec-box">
+                <strong>Крок 3. Аналіз та експорт</strong>
+                <span>Поверніться у «Симулятор», перевірте статус навантаження та завантажте текстовий звіт (.txt).</span>
+              </div>
+            </div>
+          </section>
+        </main>
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
